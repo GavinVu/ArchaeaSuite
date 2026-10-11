@@ -1,6 +1,6 @@
 [package]
 name = "archaeasuite-launcher"
-version = "0.1.0"
+version = "0.1.1"
 description = "ArchaeaSuite Launcher"
 authors = ["ArchaeaSuite contributors"]
 license = "GPL-3.0-or-later"

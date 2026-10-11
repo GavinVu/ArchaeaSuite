@@ -53,11 +53,29 @@ jobs:
           releaseBody: |
             Download the installer for your PC:
 
-            - **Most PCs:** `ArchaeaSuite.Launcher___VERSION___x64-setup.exe`
-            - **Windows on ARM:** `ArchaeaSuite.Launcher___VERSION___arm64-setup.exe`
+            - **Most PCs:** `ArchaeaSuiteSetup.exe`
+            - **Windows on ARM:** `ArchaeaSuiteSetup-arm64.exe`
+
+            No administrator rights are needed. Windows may show a SmartScreen
+            notice because the installer is not code-signed: choose
+            **More info → Run anyway**.
 
             Already have the launcher? It updates itself — open Settings → Updates.
+            The versioned `-setup.exe` files are what that updater downloads.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
           args: --target ${{ matrix.target }}
+      # The same installer again under a name that never changes, so
+      # releases/latest/download/ArchaeaSuiteSetup.exe is a permanent link.
+      - name: Upload installer under its stable name
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = (Get-Content launcher/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $setup = Get-ChildItem "launcher/src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe"
+          if (@($setup).Count -ne 1) { throw "expected one installer, found $(@($setup).Count)" }
+          $name = if ('${{ matrix.arch }}' -eq 'x64') { 'ArchaeaSuiteSetup.exe' } else { 'ArchaeaSuiteSetup-${{ matrix.arch }}.exe' }
+          Copy-Item $setup.FullName $name
+          gh release upload "launcher-v$version" $name --clobber --repo $env:GITHUB_REPOSITORY

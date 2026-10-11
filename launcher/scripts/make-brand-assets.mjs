@@ -197,4 +197,48 @@ for (const [id, glyph] of Object.entries(glyphs)) {
   await writeFile(await out(`${photoDir}/icon.ico`), Buffer.concat([header, ...pngs]));
 }
 
+// --- 5. Installer artwork ---------------------------------------------------
+// NSIS only reads uncompressed 24-bit BMP: a 164x314 sidebar for the welcome
+// and finish pages and a 150x57 header for the pages in between.
+{
+  const bmp = async (image, w, h) => {
+    const rgb = await image.flatten({ background: "#161616" }).removeAlpha().raw().toBuffer();
+    const stride = (w * 3 + 3) & ~3;
+    const file = Buffer.alloc(54 + stride * h);
+    file.write("BM");
+    file.writeUInt32LE(file.length, 2);
+    file.writeUInt32LE(54, 10);
+    file.writeUInt32LE(40, 14);
+    file.writeInt32LE(w, 18);
+    file.writeInt32LE(h, 22); // positive height: rows are stored bottom-up
+    file.writeUInt16LE(1, 26);
+    file.writeUInt16LE(24, 28);
+    file.writeUInt32LE(stride * h, 34);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const s = (y * w + x) * 3, d = 54 + (h - 1 - y) * stride + x * 3;
+        file[d] = rgb[s + 2];
+        file[d + 1] = rgb[s + 1];
+        file[d + 2] = rgb[s];
+      }
+    return file;
+  };
+  const art = async (w, h, markSize, markTop, bar) => {
+    const ground = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+         <rect width="${w}" height="${h}" fill="#161616"/>
+         <rect y="${h - bar}" width="${w}" height="${bar}" fill="#D6FF00"/>
+       </svg>`
+    );
+    const mark = await sharp(markPaper).resize(markSize, markSize).png().toBuffer();
+    return bmp(
+      sharp(ground).composite([{ input: mark, left: Math.round((w - markSize) / 2), top: markTop }]),
+      w,
+      h
+    );
+  };
+  await writeFile(await out("src-tauri/installer/sidebar.bmp"), await art(164, 314, 116, 70, 12));
+  await writeFile(await out("src-tauri/installer/header.bmp"), await art(150, 57, 44, 4, 4));
+}
+
 console.log("brand assets written");

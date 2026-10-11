@@ -1,7 +1,7 @@
 {
   "name": "archaeasuite-launcher",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ArchaeaSuite Launcher — the hub for discovering, installing, updating and launching ArchaeaSuite apps.",
   "license": "GPL-3.0-or-later",
   "type": "module",

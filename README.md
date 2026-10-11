@@ -16,13 +16,15 @@ paid features. Everything works offline.
 
 ## Install
 
-Download the launcher from the [latest release](https://github.com/GavinVu/ArchaeaSuite/releases/latest):
+Download the launcher:
 
-- `…_x64-setup.exe` for most PCs (Windows 10/11)
-- `…_arm64-setup.exe` for Windows 11 on ARM
+- **[ArchaeaSuiteSetup.exe](https://github.com/GavinVu/ArchaeaSuite/releases/latest/download/ArchaeaSuiteSetup.exe)** for most PCs (Windows 10/11, x64)
+- [ArchaeaSuiteSetup-arm64.exe](https://github.com/GavinVu/ArchaeaSuite/releases/latest/download/ArchaeaSuiteSetup-arm64.exe) for Windows 11 on ARM
 
-It installs for the current user without administrator rights and keeps itself
-up to date. Install ArchaeaPhoto from inside the launcher. The installers are
+These links always point at the newest version. The installer needs no
+administrator rights, adds a Start Menu shortcut and an entry under Windows
+Settings → Apps for uninstalling, and the launcher keeps itself up to date.
+Uninstalling the launcher leaves installed apps and your projects in place. Install ArchaeaPhoto from inside the launcher. The installers are
 not yet code-signed, so Windows SmartScreen may ask for confirmation the first
 time.
 
