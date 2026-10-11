@@ -1,0 +1,16 @@
+node_modules/
+dist/
+target/
+src-tauri/gen/
+*.log
+.DS_Store
+Thumbs.db
+
+# Built app packages (published to GitHub Releases, not committed)
+/packages/
+
+# Signing keys must never be committed
+*.key
+*.key.pub
+.env
+.env.*

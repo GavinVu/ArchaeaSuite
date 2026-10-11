@@ -1,0 +1,87 @@
+{
+  "$schema": "./catalog.schema.json",
+  "schemaVersion": 1,
+  "updated": "2026-10-11",
+  "apps": [
+    {
+      "id": "archaea-hello",
+      "name": "Archaea Hello",
+      "tagline": "A tiny test app that proves install, launch and update work.",
+      "description": "Archaea Hello is the smallest possible real application. It opens a window showing its version and how many times it has been launched.\n\nIt exists so the launcher can be tested end to end against a genuine GitHub release. Install it, launch it, update it and remove it to see the whole lifecycle before the creative apps arrive.",
+      "icon": "icons/archaea-hello.png",
+      "category": "Utilities",
+      "status": "available",
+      "featured": true,
+      "version": "1.0.0",
+      "releaseDate": "2026-10-11",
+      "releaseNotes": "First release.\n- Shows its version in a window\n- Counts how many times it has been launched",
+      "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/test-app",
+      "executable": "ArchaeaHello.exe",
+      "preserve": ["config"],
+      "packages": {
+        "x64": {
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-hello-v1.0.0/archaea-hello-1.0.0-x64.zip",
+          "sha256": "f9d8529900b582e20638901ecbb6f139ff62f8747ca51ca6eb7d2ed9e1c24d79",
+          "size": 68729,
+          "installedSize": 130730
+        }
+      }
+    },
+    {
+      "id": "archaea-photo",
+      "name": "ArchaeaPhoto",
+      "tagline": "Photo editing and image compositing.",
+      "description": "A raster editor for retouching, compositing and digital painting, with layers, masks and non-destructive adjustments.\n\nArchaeaPhoto is planned as the first creative app in the suite.",
+      "icon": "icons/archaea-photo.png",
+      "category": "Photo",
+      "status": "coming-soon",
+      "featured": true
+    },
+    {
+      "id": "archaea-vector",
+      "name": "ArchaeaVector",
+      "tagline": "Vector illustration and logo design.",
+      "description": "Precise vector drawing for illustration, icons, logos and typography.",
+      "icon": "icons/archaea-vector.png",
+      "category": "Illustration",
+      "status": "coming-soon",
+      "featured": true
+    },
+    {
+      "id": "archaea-cut",
+      "name": "ArchaeaCut",
+      "tagline": "Video editing on a multi-track timeline.",
+      "description": "A non-linear video editor for cutting, colour and sound.",
+      "icon": "icons/archaea-cut.png",
+      "category": "Video",
+      "status": "coming-soon"
+    },
+    {
+      "id": "archaea-motion",
+      "name": "ArchaeaMotion",
+      "tagline": "Motion graphics and visual effects.",
+      "description": "Keyframe animation, compositing and effects for titles and motion design.",
+      "icon": "icons/archaea-motion.png",
+      "category": "Video",
+      "status": "coming-soon"
+    },
+    {
+      "id": "archaea-layout",
+      "name": "ArchaeaLayout",
+      "tagline": "Page layout for print and digital publishing.",
+      "description": "Multi-page layout for books, magazines, posters and brochures.",
+      "icon": "icons/archaea-layout.png",
+      "category": "Publishing",
+      "status": "coming-soon"
+    },
+    {
+      "id": "archaea-audio",
+      "name": "ArchaeaAudio",
+      "tagline": "Audio recording, editing and restoration.",
+      "description": "Multi-track recording, waveform editing and clean-up for podcasts, music and film sound.",
+      "icon": "icons/archaea-audio.png",
+      "category": "Audio",
+      "status": "coming-soon"
+    }
+  ]
+}

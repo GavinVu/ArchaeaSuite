@@ -1,0 +1,19 @@
+[package]
+name = "archaea-hello"
+version = "1.0.0"
+description = "A tiny test application used to exercise the ArchaeaSuite Launcher end to end."
+license = "GPL-3.0-or-later"
+edition = "2021"
+
+[[bin]]
+name = "ArchaeaHello"
+path = "src/main.rs"
+
+# Standalone on purpose: not part of the launcher's build.
+[workspace]
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
+strip = true

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog:
+    name: Validate catalog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check catalog against schema
+        run: npx --yes ajv-cli@5 validate --spec=draft7 --strict=false -s catalog/catalog.schema.json -d catalog/catalog.json
+
+  test:
+    name: Test and build (x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - name: Typecheck and build frontend
+        run: npm run build
+      - name: Backend tests
+        working-directory: src-tauri
+        run: cargo test --locked
+      # Unsigned build: proves the installer bundles. Updater artifacts need the
+      # signing key, so they are only produced by the release workflow.
+      - name: Build installer
+        run: npm run tauri build -- --config src-tauri/tauri.unsigned.conf.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ArchaeaSuite-Launcher-x64-unsigned
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error

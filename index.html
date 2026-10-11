@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>ArchaeaSuite</title>
+    <!-- Applies the saved theme before first paint, so there is no flash. -->
+    <script src="/theme-boot.js"></script>
+    <link rel="stylesheet" href="/splash.css" />
+  </head>
+  <body>
+    <!-- Static splash: visible instantly, removed once the app has loaded. -->
+    <div id="splash" role="status" aria-label="ArchaeaSuite is starting">
+      <div class="splash-inner">
+        <img class="splash-mark for-dark" src="/brand/mark-inverse.png" alt="" width="148" height="148" />
+        <img class="splash-mark for-light" src="/brand/mark.png" alt="" width="148" height="148" />
+        <div class="splash-word">Archaea<span>Suite</span></div>
+        <div class="splash-bar"><i></i></div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
