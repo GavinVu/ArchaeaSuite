@@ -2,6 +2,7 @@ node_modules/
 dist/
 target/
 launcher/src-tauri/gen/
+apps/*/src-tauri/gen/
 *.log
 .DS_Store
 Thumbs.db
