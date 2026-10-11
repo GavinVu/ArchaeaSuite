@@ -1,95 +1,96 @@
-# ArchaeaSuite Launcher
+# ArchaeaSuite
 
 **ArchaeaSuite** is a free, open-source family of creative applications — an
 alternative to subscription creative software. No fees, no ads, no accounts, no
-paid features.
+paid features. Everything works offline.
 
-This repository is the **ArchaeaSuite Launcher**: the hub you install once and
-then use to discover, install, update, repair, uninstall and launch every
-ArchaeaSuite app.
-
-| Planned app | Purpose |
-| --- | --- |
-| ArchaeaPhoto | Photo editing and compositing |
-| ArchaeaVector | Vector illustration |
-| ArchaeaCut | Video editing |
-| ArchaeaMotion | Motion graphics and effects |
-| ArchaeaLayout | Page layout |
-| ArchaeaAudio | Audio editing |
-
-None of the creative apps exist yet. The launcher ships with a small test app,
-**Archaea Hello**, that exercises the complete install → launch → update →
-uninstall lifecycle against real GitHub Releases.
+| App | Purpose | Status |
+| --- | --- | --- |
+| **ArchaeaSuite Launcher** | Install, update and launch the suite | Available |
+| **ArchaeaPhoto** | Photo editing and compositing | Preview (0.1) |
+| ArchaeaVector | Vector illustration | Planned |
+| ArchaeaCut | Video editing | Planned |
+| ArchaeaMotion | Motion graphics and effects | Planned |
+| ArchaeaLayout | Page layout | Planned |
+| ArchaeaAudio | Audio editing | Planned |
 
 ## Install
 
-Download the installer from the [latest release](https://github.com/GavinVu/ArchaeaSuite/releases/latest):
+Download the launcher from the [latest release](https://github.com/GavinVu/ArchaeaSuite/releases/latest):
 
 - `…_x64-setup.exe` for most PCs (Windows 10/11)
 - `…_arm64-setup.exe` for Windows 11 on ARM
 
 It installs for the current user without administrator rights and keeps itself
-up to date. The installers are not yet code-signed, so Windows SmartScreen may
-ask for confirmation the first time.
+up to date. Install ArchaeaPhoto from inside the launcher. The installers are
+not yet code-signed, so Windows SmartScreen may ask for confirmation the first
+time.
 
-## What it does
+## ArchaeaSuite Launcher
 
 - **Catalog from GitHub.** The app list is a JSON file in this repo, fetched at
   startup and cached. New apps appear without a launcher update.
-- **Works offline.** Installed apps launch with no connection; the cached
-  catalog keeps the rest of the UI usable.
+- **Works offline.** Installed apps launch with no connection.
 - **Verified downloads.** Packages come only from GitHub Releases of trusted
   owners, over HTTPS, and must match the SHA-256 in the catalog.
 - **Safe installs.** ZIPs are extracted with path-traversal, symlink and
   zip-bomb checks into a staging folder, then swapped into place. A failed
   update rolls back to the version you had.
 - **Separate, signed self-update** for the launcher itself.
-- Dark and light themes, keyboard navigation, reduced-motion support.
+
+## ArchaeaPhoto
+
+A layered raster editor (C#, Avalonia, SkiaSharp).
+
+- **Documents:** new, open, save, export, image size, canvas size; PNG, JPEG,
+  WebP and TIFF; layered `.archa` projects (an open ZIP + JSON + PNG format);
+  several documents in tabs.
+- **Layers:** create, delete, duplicate, reorder (drag or keys), rename,
+  visibility, opacity, 17 blend modes, groups, masks, merge down, flatten.
+- **Tools:** move, rectangular and elliptical marquee, lasso, magic wand, crop,
+  eyedropper, brush, eraser, clone stamp, paint bucket, gradient, text, shapes,
+  hand, zoom, free transform.
+- **Adjustments:** brightness/contrast, levels, curves, exposure,
+  hue/saturation, colour balance, invert, desaturate — with live preview.
+- **Filters:** Gaussian blur, sharpen (unsharp mask), noise reduction.
+- Undo/redo with a history panel, keyboard shortcuts (F1 lists them), dark and
+  light themes.
+
+Known limits of this preview are listed in [apps/ArchaeaPhoto/README.md](apps/ArchaeaPhoto/README.md).
 
 ## Develop
 
-Requirements: [Node.js](https://nodejs.org) 20+, [Rust](https://rustup.rs)
-(stable, MSVC toolchain) and the Visual Studio C++ Build Tools.
+```
+launcher/            the launcher (Tauri 2, Rust, React + TypeScript)
+apps/ArchaeaPhoto/   the photo editor (.NET 9, Avalonia 11, SkiaSharp)
+shared/              brand sources, fonts and scripts used by every app
+catalog/             the hosted app catalog, its JSON schema and icons
+docs/                publishing guide
+```
+
+**Launcher** — needs [Node.js](https://nodejs.org) 20+, [Rust](https://rustup.rs)
+(stable, MSVC) and the Visual Studio C++ Build Tools.
 
 ```powershell
+cd launcher
 npm install
-npm run tauri dev          # run the launcher
-npm run typecheck          # TypeScript
-cd src-tauri; cargo test   # backend tests
+npm run tauri dev                       # run
+npm run typecheck                       # TypeScript
+cd src-tauri; cargo test                # backend tests
+npm run tauri build -- --config src-tauri/tauri.unsigned.conf.json   # local installer
 ```
 
-Build the installer (`src-tauri/target/release/bundle/nsis/*.exe`):
+**ArchaeaPhoto** — needs the [.NET 9 SDK](https://dotnet.microsoft.com/download).
 
 ```powershell
-# unsigned, for local use
-npm run tauri build -- --config src-tauri/tauri.unsigned.conf.json
-
-# signed update artifacts, as CI does
-$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content $HOME\.tauri\archaeasuite-launcher.key -Raw
-npm run tauri build
+cd apps/ArchaeaPhoto
+dotnet run --project src/ArchaeaPhoto   # run
+dotnet test                             # engine and UI tests
+./build.ps1                             # self-contained build + launcher package
 ```
 
-ARM64: `rustup target add aarch64-pc-windows-msvc`, then add
-`--target aarch64-pc-windows-msvc`.
-
-To test the install pipeline against a local catalog instead of GitHub, see
-[Testing before you publish](docs/PUBLISHING.md#testing-before-you-publish).
-
-## Publishing apps
-
-See [docs/PUBLISHING.md](docs/PUBLISHING.md) for how to package an app, add it
-to the catalog and release launcher updates.
-
-## Layout
-
-```
-catalog/        the hosted app catalog, its JSON schema and icons
-src/            React + TypeScript UI
-src-tauri/      Rust backend (catalog, installer, registry, settings)
-test-app/       Archaea Hello, the end-to-end test application
-scripts/        packaging, brand assets, local dev catalog server
-docs/           publishing guide
-```
+To test installing an app through the launcher without publishing anything,
+and for release steps, see [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 ## License
 

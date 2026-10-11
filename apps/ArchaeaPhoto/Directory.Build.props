@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- One version for the whole app; the launcher catalog must match it. -->
+    <Version>0.1.0</Version>
+    <Authors>ArchaeaSuite contributors</Authors>
+    <Copyright>Copyright (C) 2026 ArchaeaSuite contributors. Licensed under GPL-3.0-or-later.</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <AvaloniaVersion>11.3.22</AvaloniaVersion>
+  </PropertyGroup>
+</Project>

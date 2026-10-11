@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.660" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ArchaeaPhoto.Tests" />
+  </ItemGroup>
+</Project>

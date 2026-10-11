@@ -1,0 +1,45 @@
+ArchaeaPhoto is licensed under the GNU General Public License v3.0 or later
+(see LICENSE.txt). It includes the following third-party components.
+
+.NET runtime — MIT License
+  Copyright (c) .NET Foundation and Contributors
+  https://github.com/dotnet/runtime
+
+Avalonia UI — MIT License
+  Copyright (c) AvaloniaUI OÜ
+  https://github.com/AvaloniaUI/Avalonia
+
+SkiaSharp — MIT License
+  Copyright (c) Xamarin, Inc. and Microsoft Corporation
+  https://github.com/mono/SkiaSharp
+Skia — BSD 3-Clause License
+  Copyright (c) Google Inc.
+  https://skia.org
+
+HarfBuzzSharp / HarfBuzz — MIT License
+  https://github.com/harfbuzz/harfbuzz
+
+ANGLE — BSD 3-Clause License
+  Copyright The ANGLE Project Authors
+  https://chromium.googlesource.com/angle/angle
+
+LibTiff.NET — BSD 3-Clause License
+  Copyright (c) Bit Miracle
+  https://github.com/BitMiracle/libtiff.net
+
+MicroCom — MIT License
+  https://github.com/kekekeks/MicroCom
+
+Archivo typeface — SIL Open Font License 1.1
+  Copyright The Archivo Project Authors
+  https://github.com/Omnibus-Type/Archivo
+
+IBM Plex Mono typeface — SIL Open Font License 1.1
+  Copyright IBM Corp.
+  https://github.com/IBM/plex
+
+Lucide icons — ISC License
+  Copyright (c) Lucide Contributors
+  https://lucide.dev
+
+The full text of each licence is available at the project pages above.

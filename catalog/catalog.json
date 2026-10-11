@@ -4,40 +4,33 @@
   "updated": "2026-10-11",
   "apps": [
     {
-      "id": "archaea-hello",
-      "name": "Archaea Hello",
-      "tagline": "A tiny test app that proves install, launch and update work.",
-      "description": "Archaea Hello is the smallest possible real application. It opens a window showing its version and how many times it has been launched.\n\nIt exists so the launcher can be tested end to end against a genuine GitHub release. Install it, launch it, update it and remove it to see the whole lifecycle before the creative apps arrive.",
-      "icon": "icons/archaea-hello.png",
-      "category": "Utilities",
-      "status": "available",
-      "featured": true,
-      "version": "1.1.0",
-      "releaseDate": "2026-10-11",
-      "releaseNotes": "A small update, published to prove the update path.\n- The window now reports version 1.1.0\n- Your launch count carries over from 1.0.0",
-      "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/test-app",
-      "executable": "ArchaeaHello.exe",
-      "preserve": [
-        "config"
-      ],
-      "packages": {
-        "x64": {
-          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-hello-v1.1.0/archaea-hello-1.1.0-x64.zip",
-          "sha256": "5bc0765987c453a6d9a84472176b32b4f623d8091fbe3b2aa3dcddf2e0b15a59",
-          "size": 68729,
-          "installedSize": 130730
-        }
-      }
-    },
-    {
       "id": "archaea-photo",
       "name": "ArchaeaPhoto",
       "tagline": "Photo editing and image compositing.",
-      "description": "A raster editor for retouching, compositing and digital painting, with layers, masks and non-destructive adjustments.\n\nArchaeaPhoto is planned as the first creative app in the suite.",
+      "description": "A layered image editor for retouching, compositing and digital painting.\n\nWork with layers, groups, masks and blend modes. Paint with the brush, eraser and clone stamp; select with marquee, lasso and magic wand; add text, shapes and gradients; crop and transform. Adjust brightness, contrast, exposure, levels, curves, saturation and colour balance, and blur, sharpen or reduce noise.\n\nOpens and exports PNG, JPEG, WebP and TIFF, and saves layered projects in the open .archa format. Works fully offline.",
       "icon": "icons/archaea-photo.png",
       "category": "Photo",
-      "status": "coming-soon",
-      "featured": true
+      "status": "available",
+      "featured": true,
+      "releaseNotes": "First preview release.\n- Layers, groups, masks and 17 blend modes\n- Brush, eraser, clone stamp, fill, gradient, text and shapes\n- Selections, crop and free transform\n- Adjustments and filters with live preview\n- PNG, JPEG, WebP, TIFF and layered .archa projects",
+      "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/apps/ArchaeaPhoto",
+      "executable": "ArchaeaPhoto.exe",
+      "version": "0.1.0",
+      "releaseDate": "2026-10-11",
+      "packages": {
+        "x64": {
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-photo-v0.1.0/archaea-photo-0.1.0-x64.zip",
+          "sha256": "3e0d479994ee583aa584d5b48b6ec5960df9e258dea45a1993354e02afad54a5",
+          "size": 46055916,
+          "installedSize": 106270719
+        },
+        "arm64": {
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-photo-v0.1.0/archaea-photo-0.1.0-arm64.zip",
+          "sha256": "e0eee02107357f0e1945c67469cc7ddf6dbe3c7134e2ce00cef29de438093375",
+          "size": 44261879,
+          "installedSize": 114443195
+        }
+      }
     },
     {
       "id": "archaea-vector",
@@ -84,6 +77,32 @@
       "icon": "icons/archaea-audio.png",
       "category": "Audio",
       "status": "coming-soon"
+    },
+    {
+      "id": "archaea-hello",
+      "name": "Archaea Hello",
+      "tagline": "A tiny test app that proves install, launch and update work.",
+      "description": "Archaea Hello is the smallest possible real application. It opens a window showing its version and how many times it has been launched.\n\nIt exists so the launcher can be tested end to end against a genuine GitHub release. Install it, launch it, update it and remove it to see the whole lifecycle before the creative apps arrive.",
+      "icon": "icons/archaea-hello.png",
+      "category": "Utilities",
+      "status": "available",
+      "featured": false,
+      "version": "1.1.0",
+      "releaseDate": "2026-10-11",
+      "releaseNotes": "A small update, published to prove the update path.\n- The window now reports version 1.1.0\n- Your launch count carries over from 1.0.0",
+      "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/test-app",
+      "executable": "ArchaeaHello.exe",
+      "preserve": [
+        "config"
+      ],
+      "packages": {
+        "x64": {
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-hello-v1.1.0/archaea-hello-1.1.0-x64.zip",
+          "sha256": "5bc0765987c453a6d9a84472176b32b4f623d8091fbe3b2aa3dcddf2e0b15a59",
+          "size": 68729,
+          "installedSize": 130730
+        }
+      }
     }
   ]
 }
