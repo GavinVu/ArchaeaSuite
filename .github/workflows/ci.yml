@@ -20,24 +20,46 @@ jobs:
       - name: Check catalog against schema
         run: npx --yes ajv-cli@5 validate --spec=draft7 --strict=false -s catalog/catalog.schema.json -d catalog/catalog.json
 
-  test:
-    name: Test and build (x64)
+  photo:
+    name: ArchaeaPhoto (test and build, x64)
     runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Engine and UI tests
+        run: dotnet test apps/ArchaeaPhoto --nologo
+      - name: Publish (self-contained)
+        run: dotnet publish apps/ArchaeaPhoto/src/ArchaeaPhoto -c Release -r win-x64 --self-contained true -p:DebugType=none -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ArchaeaPhoto-x64
+          path: publish
+          if-no-files-found: error
+
+  test:
+    name: Launcher (test and build, x64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: launcher
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: launcher/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: launcher/src-tauri
       - run: npm ci
       - name: Typecheck and build frontend
         run: npm run build
       - name: Backend tests
-        working-directory: src-tauri
+        working-directory: launcher/src-tauri
         run: cargo test --locked
       # Unsigned build: proves the installer bundles. Updater artifacts need the
       # signing key, so they are only produced by the release workflow.
@@ -46,5 +68,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ArchaeaSuite-Launcher-x64-unsigned
-          path: src-tauri/target/release/bundle/nsis/*.exe
+          path: launcher/src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: error

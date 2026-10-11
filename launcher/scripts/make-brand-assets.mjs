@@ -1,13 +1,14 @@
-// Derives every brand asset from ArchaeaSuiteLogo.png:
+// Derives every brand asset from shared/brand/ArchaeaSuiteLogo.png:
 //   public/brand/mark.png          the emblem, original colours (light backgrounds)
 //   public/brand/mark-inverse.png  the emblem with black swapped for off-white (dark backgrounds)
 //   src-tauri/app-icon.png         1024px source for `npm run tauri icon`
-//   catalog/icons/*.png            icons for the sample catalog
+//   ../apps/ArchaeaPhoto/.../Assets  ArchaeaPhoto emblem and icon (from ArchaeaPhotoLogo.png)
+//   ../catalog/icons/*.png           icons for the sample catalog
 //
 // Run with `npm run brand`, then `npm run tauri icon src-tauri/app-icon.png`.
 
 import sharp from "sharp";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,7 +24,7 @@ const out = async (rel) => {
 };
 
 // --- 1. Isolate the emblem (everything above the wordmark) -----------------
-const logo = sharp(resolve(root, "ArchaeaSuiteLogo.png")).ensureAlpha();
+const logo = sharp(resolve(root, "../shared/brand/ArchaeaSuiteLogo.png")).ensureAlpha();
 const { data, info } = await logo.raw().toBuffer({ resolveWithObject: true });
 const { width, height, channels } = info;
 
@@ -101,7 +102,6 @@ await sharp(tile)
 // Flat lime glyphs on a near-black tile; one per planned application.
 const glyphs = {
   "archaea-hello": `<path d="M76 92 L124 128 L76 164" fill="none" stroke="#D6FF00" stroke-width="20" stroke-linejoin="miter"/><rect x="132" y="148" width="52" height="20" fill="#D6FF00"/>`,
-  "archaea-photo": `<rect x="62" y="70" width="132" height="116" fill="none" stroke="#D6FF00" stroke-width="16"/><circle cx="128" cy="128" r="30" fill="#D6FF00"/><rect x="160" y="84" width="16" height="16" fill="#D6FF00"/>`,
   "archaea-vector": `<path d="M70 186 C 70 100, 150 70, 186 70" fill="none" stroke="#D6FF00" stroke-width="16"/><rect x="54" y="170" width="32" height="32" fill="#D6FF00"/><rect x="170" y="54" width="32" height="32" fill="#D6FF00"/><circle cx="104" cy="104" r="12" fill="#D6FF00"/>`,
   "archaea-cut": `<rect x="56" y="78" width="96" height="36" fill="#D6FF00"/><rect x="104" y="142" width="96" height="36" fill="#D6FF00"/><rect x="56" y="142" width="32" height="36" fill="none" stroke="#D6FF00" stroke-width="8"/><rect x="120" y="56" width="12" height="144" fill="#F5F5F0"/>`,
   "archaea-motion": `<circle cx="92" cy="128" r="38" fill="none" stroke="#D6FF00" stroke-width="8" opacity="0.45"/><circle cx="128" cy="128" r="38" fill="none" stroke="#D6FF00" stroke-width="12" opacity="0.7"/><circle cx="164" cy="128" r="38" fill="#D6FF00"/>`,
@@ -119,7 +119,82 @@ for (const [id, glyph] of Object.entries(glyphs)) {
     <rect x="6" y="6" width="244" height="244" rx="28" fill="#161616" stroke="#D6FF00" stroke-width="6"/>
     ${glyph}
   </svg>`;
-  await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(await out(`catalog/icons/${id}.png`));
+  await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(await out(`../catalog/icons/${id}.png`));
+}
+
+// --- 4. ArchaeaPhoto: emblem, application icon and catalog icon -------------
+// The Photo logo adds off-white details to the black/lime emblem, so each pixel
+// is split into black, lime and white parts before recolouring.
+{
+  const photoDir = "../apps/ArchaeaPhoto/src/ArchaeaPhoto/Assets";
+  const src = sharp(resolve(root, "../shared/brand/ArchaeaPhotoLogo.png")).ensureAlpha();
+  const { data: px, info: pi } = await src.raw().toBuffer({ resolveWithObject: true });
+  const W = pi.width, H = pi.height, C = pi.channels;
+  const ink = (y) => {
+    for (let x = 0; x < W; x++) if (px[(y * W + x) * C + 3] > 24) return true;
+    return false;
+  };
+  let t = 0;
+  while (t < H && !ink(t)) t++;
+  let bt = t;
+  for (let y = t, gap = 0; y < H; y++) {
+    if (ink(y)) { bt = y; gap = 0; } else if (++gap > 12) break;
+  }
+  let l = W, r = 0;
+  for (let y = t; y <= bt; y++)
+    for (let x = 0; x < W; x++)
+      if (px[(y * W + x) * C + 3] > 24) { if (x < l) l = x; if (x > r) r = x; }
+  const pbox = { left: l, top: t, width: r - l + 1, height: bt - t + 1 };
+  console.log("photo emblem bounds:", pbox);
+  const pside = Math.max(pbox.width, pbox.height);
+
+  const tint = (dark, light) => {
+    const copy = Buffer.from(px);
+    for (let i = 0; i < copy.length; i += C) {
+      const w = copy[i + 2] / 255; // lime has no blue, so blue measures white
+      const lime = Math.max(0, Math.min(1 - w, copy[i + 1] / 255 - w));
+      const k = Math.max(0, 1 - w - lime);
+      for (let c = 0; c < 3; c++) copy[i + c] = Math.round(dark[c] * k + LIME[c] * lime + light[c] * w);
+    }
+    return sharp(copy, { raw: { width: W, height: H, channels: C } })
+      .extract(pbox)
+      .extend({
+        top: Math.floor((pside - pbox.height) / 2), bottom: Math.ceil((pside - pbox.height) / 2),
+        left: Math.floor((pside - pbox.width) / 2), right: Math.ceil((pside - pbox.width) / 2),
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+  };
+  const photoInk = await tint(INK, PAPER);
+  const photoPaper = await tint(PAPER, INK);
+  await sharp(photoInk).resize(512, 512).png().toFile(await out(`${photoDir}/mark.png`));
+  await sharp(photoPaper).resize(512, 512).png().toFile(await out(`${photoDir}/mark-inverse.png`));
+
+  // Same tile as the launcher icon so the suite reads as one family.
+  const photoEmblem = await sharp(photoInk).resize(760, 760).png().toBuffer();
+  const photoIcon = await sharp(tile).composite([{ input: photoEmblem, gravity: "centre" }]).png().toBuffer();
+  await sharp(photoIcon).resize(256, 256).png({ compressionLevel: 9 }).toFile(await out("../catalog/icons/archaea-photo.png"));
+  await sharp(photoIcon).resize(256, 256).png().toFile(await out(`${photoDir}/icon.png`));
+
+  // .ico with PNG-compressed entries (supported since Windows Vista).
+  const sizes = [16, 24, 32, 48, 64, 128, 256];
+  const pngs = await Promise.all(sizes.map((n) => sharp(photoIcon).resize(n, n).png().toBuffer()));
+  const header = Buffer.alloc(6 + 16 * sizes.length);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(sizes.length, 4);
+  let offset = header.length;
+  sizes.forEach((n, i) => {
+    const e = 6 + 16 * i;
+    header.writeUInt8(n === 256 ? 0 : n, e);
+    header.writeUInt8(n === 256 ? 0 : n, e + 1);
+    header.writeUInt16LE(1, e + 4);
+    header.writeUInt16LE(32, e + 6);
+    header.writeUInt32LE(pngs[i].length, e + 8);
+    header.writeUInt32LE(offset, e + 12);
+    offset += pngs[i].length;
+  });
+  await writeFile(await out(`${photoDir}/icon.ico`), Buffer.concat([header, ...pngs]));
 }
 
 console.log("brand assets written");

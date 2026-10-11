@@ -22,10 +22,10 @@ A package is a plain ZIP of the app's install folder.
 - Build one ZIP per architecture you support (`x64`, `arm64`). An ARM64 PC
   falls back to the `x64` package when there is no `arm64` one.
 
-`scripts/package-app.ps1` builds a correct ZIP and prints the catalog fields:
+`shared/scripts/package-app.ps1` builds a correct ZIP and prints the catalog fields:
 
 ```powershell
-./scripts/package-app.ps1 -Source build\ArchaeaPhoto -Id archaea-photo `
+./shared/scripts/package-app.ps1 -Source build\ArchaeaPhoto -Id archaea-photo `
     -Version 1.0.0 -Arch x64 -Repo GavinVu/ArchaeaPhoto -Tag v1.0.0
 ```
 
@@ -46,7 +46,7 @@ gh release create v1.0.0 packages\archaea-photo-1.0.0-x64.zip `
 ```
 
 The release must belong to a **trusted owner** — a GitHub account listed in
-`TRUSTED_OWNERS` in [`src-tauri/src/trust.rs`](../src-tauri/src/trust.rs).
+`TRUSTED_OWNERS` in [`launcher/src-tauri/src/trust.rs`](../launcher/src-tauri/src/trust.rs).
 Any repository under a trusted owner works, so each app can have its own repo.
 
 > If you publish an app release in *this* repository (as the test app does),
@@ -125,25 +125,71 @@ publishing anything:
 
 ```powershell
 # terminal 1 — serves catalog/catalog.json and ./packages on 127.0.0.1:8765
-node scripts/dev-server.mjs
+node shared/scripts/dev-server.mjs
 
 # terminal 2 — a debug build that reads the local catalog
 $env:ARCHAEA_DEV_CATALOG = "http://127.0.0.1:8765/catalog.json"
-npm run tauri dev
+cd launcher; npm run tauri dev
 ```
 
 The dev server rewrites package URLs, sizes and checksums to match the ZIPs in
 `./packages`. Start it with `FAIL=checksum` to see a rejected download, or
-`HELLO_VERSION=1.1.0` to serve the test app as an update. Release builds
-ignore `ARCHAEA_DEV_CATALOG`.
+`HELLO_VERSION=1.1.0` / `PHOTO_VERSION=0.1.1` to serve another version of an
+app as an update. An app with no ZIP in `./packages` is shown as "coming soon".
+Release builds ignore `ARCHAEA_DEV_CATALOG`.
+
+If the installed launcher is already running, the debug build will only bring
+it to the front (the launcher is single-instance). Give the debug build its own
+identity so both can run:
+
+```powershell
+npm run tauri dev -- --config '{\"identifier\":\"org.archaeasuite.launcher.dev\"}'
+```
+
+## Releasing ArchaeaPhoto
+
+1. Set `<Version>` in `apps/ArchaeaPhoto/Directory.Build.props`.
+2. Build and package both architectures (runs the tests first):
+
+   ```powershell
+   ./apps/ArchaeaPhoto/build.ps1
+   ./apps/ArchaeaPhoto/build.ps1 -Arch arm64
+   ```
+
+3. Write the version, URLs, sizes and SHA-256 of those exact ZIPs into the
+   catalog, then edit `releaseNotes` by hand:
+
+   ```powershell
+   node shared/scripts/catalog-set-package.mjs archaea-photo 0.1.0
+   ```
+
+4. Test the install and the update with the local server (above).
+5. Upload the same ZIPs, then publish the catalog:
+
+   ```powershell
+   gh release create archaea-photo-v0.1.0 packages/archaea-photo-0.1.0-x64.zip packages/archaea-photo-0.1.0-arm64.zip `
+       --title "ArchaeaPhoto 0.1.0" --notes "Install it from ArchaeaSuite Launcher." --latest=false
+   git add catalog; git commit -m "Release ArchaeaPhoto 0.1.0"; git push
+   ```
+
+Order matters: the release must exist before the catalog that points at it is
+pushed, and the ZIPs must not be rebuilt in between (builds are not
+byte-for-byte reproducible, so a rebuilt ZIP no longer matches its checksum).
+`--latest=false` keeps the launcher installer as the repository's latest
+release, which the launcher's self-updater relies on.
+
+ArchaeaPhoto keeps nothing inside its install folder — projects go where the
+user saves them and settings live in `%APPDATA%\ArchaeaSuite\ArchaeaPhoto` —
+so its catalog entry needs no `preserve` list and uninstalling never deletes
+projects.
 
 ## Releasing the launcher itself
 
 Launcher updates are separate from app updates and are cryptographically
 signed.
 
-1. Bump `version` in `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` and
-   `package.json`.
+1. Bump `version` in `launcher/src-tauri/tauri.conf.json`,
+   `launcher/src-tauri/Cargo.toml` and `launcher/package.json`.
 2. Commit, then push a tag: `git tag launcher-v0.2.0 && git push --tags`.
 3. The **Release launcher** workflow builds x64 and ARM64 installers, signs
    the update artifacts and publishes a release containing `latest.json`.

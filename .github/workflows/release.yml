@@ -1,7 +1,7 @@
 name: Release launcher
 
 # Push a tag like `launcher-v0.2.0` (matching the version in
-# src-tauri/tauri.conf.json) to build signed installers for x64 and ARM64 and
+# launcher/src-tauri/tauri.conf.json) to build signed installers for x64 and ARM64 and
 # publish them, together with the `latest.json` the launcher's self-updater
 # reads, as a GitHub Release.
 
@@ -31,20 +31,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: launcher/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: launcher/src-tauri
           key: ${{ matrix.target }}
       - run: npm ci
+        working-directory: launcher
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
+          projectPath: launcher
           tagName: launcher-v__VERSION__
           releaseName: ArchaeaSuite Launcher v__VERSION__
           releaseBody: |

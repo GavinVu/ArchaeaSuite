@@ -3,7 +3,7 @@
   Builds the Archaea Hello test application at a given version and packages it.
 
 .EXAMPLE
-  ./scripts/build-test-app.ps1 -Version 1.1.0
+  ./launcher/scripts/build-test-app.ps1 -Version 1.1.0
 #>
 param(
   [Parameter(Mandatory)] [string] $Version,
@@ -33,4 +33,4 @@ A test application for ArchaeaSuite Launcher. Licensed under GPL-3.0-or-later.
 Source: https://github.com/GavinVu/ArchaeaSuite/tree/main/test-app
 "@
 
-& (Join-Path $PSScriptRoot 'package-app.ps1') -Source $stage -Id 'archaea-hello' -Version $Version -Arch $Arch
+& (Join-Path $root '..\shared\scripts\package-app.ps1') -Source $stage -Id 'archaea-hello' -Version $Version -Arch $Arch

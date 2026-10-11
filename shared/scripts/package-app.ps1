@@ -4,7 +4,7 @@
   and prints the catalog fields for it.
 
 .EXAMPLE
-  ./scripts/package-app.ps1 -Source build/ArchaeaPhoto -Id archaea-photo -Version 1.0.0 -Arch x64 `
+  ./shared/scripts/package-app.ps1 -Source build/ArchaeaPhoto -Id archaea-photo -Version 1.0.0 -Arch x64 `
       -Repo GavinVu/ArchaeaPhoto -Tag v1.0.0
 #>
 param(
@@ -12,7 +12,7 @@ param(
   [Parameter(Mandatory)] [string] $Id,
   [Parameter(Mandatory)] [string] $Version,
   [ValidateSet('x64', 'arm64')] [string] $Arch = 'x64',
-  [string] $OutDir = (Join-Path $PSScriptRoot '..\packages'),
+  [string] $OutDir = (Join-Path $PSScriptRoot '..\..\packages'),
   # Used only to print the download URL the catalog should contain.
   [string] $Repo = 'GavinVu/ArchaeaSuite',
   [string] $Tag = "$Id-v$Version"

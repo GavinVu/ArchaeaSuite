@@ -39,7 +39,7 @@
     "shortDescription": "ArchaeaSuite Launcher",
     "longDescription": "Discover, install, update and launch the free, open-source ArchaeaSuite creative applications.",
     "homepage": "https://github.com/GavinVu/ArchaeaSuite",
-    "licenseFile": "../LICENSE",
+    "licenseFile": "../../LICENSE",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

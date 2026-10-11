@@ -1,7 +1,7 @@
 node_modules/
 dist/
 target/
-src-tauri/gen/
+launcher/src-tauri/gen/
 *.log
 .DS_Store
 Thumbs.db
@@ -14,3 +14,9 @@ Thumbs.db
 *.key.pub
 .env
 .env.*
+
+# .NET build output
+bin/
+obj/
+*.user
+/apps/*/publish/
