@@ -26,6 +26,10 @@ A plain `npm run tauri build` needs `TAURI_SIGNING_PRIVATE_KEY` (updater
 artifacts are signed). The key lives outside the repo at
 `~/.tauri/archaeasuite-launcher.key`; never commit it.
 
+To drive the running UI from a script (click buttons, screenshot), start the
+app with `$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9222"`
+and use `node scripts/cdp.mjs click "Install"` / `shot out.png` / `eval "<js>"`.
+
 In PowerShell 5.1 do not append `2>&1` to cargo/npm commands — stderr becomes
 a terminating error.
 

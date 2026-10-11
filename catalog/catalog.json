@@ -12,16 +12,18 @@
       "category": "Utilities",
       "status": "available",
       "featured": true,
-      "version": "1.0.0",
+      "version": "1.1.0",
       "releaseDate": "2026-10-11",
-      "releaseNotes": "First release.\n- Shows its version in a window\n- Counts how many times it has been launched",
+      "releaseNotes": "A small update, published to prove the update path.\n- The window now reports version 1.1.0\n- Your launch count carries over from 1.0.0",
       "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/test-app",
       "executable": "ArchaeaHello.exe",
-      "preserve": ["config"],
+      "preserve": [
+        "config"
+      ],
       "packages": {
         "x64": {
-          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-hello-v1.0.0/archaea-hello-1.0.0-x64.zip",
-          "sha256": "f9d8529900b582e20638901ecbb6f139ff62f8747ca51ca6eb7d2ed9e1c24d79",
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-hello-v1.1.0/archaea-hello-1.1.0-x64.zip",
+          "sha256": "5bc0765987c453a6d9a84472176b32b4f623d8091fbe3b2aa3dcddf2e0b15a59",
           "size": 68729,
           "installedSize": 130730
         }
