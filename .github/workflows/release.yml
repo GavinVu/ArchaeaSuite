@@ -19,6 +19,9 @@ jobs:
     runs-on: windows-latest
     strategy:
       fail-fast: false
+      # One at a time: both builds create the same release and merge their
+      # entry into the same latest.json, and doing that concurrently races.
+      max-parallel: 1
       matrix:
         include:
           - arch: x64
