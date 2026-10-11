@@ -7,7 +7,10 @@
 //
 // Package URLs in the served catalog are rewritten to point at this server.
 // Only debug builds honour ARCHAEA_DEV_CATALOG; release builds ignore it.
-// Set HELLO_VERSION / FAIL=checksum to simulate an update or a bad download.
+// Environment switches:
+//   HELLO_VERSION=1.1.0   serve that version of the test app (simulate an update)
+//   FAIL=checksum         advertise a wrong SHA-256 (simulate a corrupt download)
+//   THROTTLE_KBPS=2000    slow package downloads down to watch progress / cancel
 
 import { createServer } from "node:http";
 import { createHash } from "node:crypto";
@@ -54,7 +57,16 @@ createServer(async (req, res) => {
       "content-type": types[extname(file)] ?? "application/octet-stream",
       "content-length": info.size,
     });
-    res.end(await readFile(file));
+    const body = await readFile(file);
+    const kbps = Number(process.env.THROTTLE_KBPS ?? 0);
+    if (!kbps || !path.startsWith("/packages/")) return res.end(body);
+    // Trickle the package out so download progress and cancel can be watched.
+    const step = Math.max(1, Math.floor((kbps * 1024) / 10));
+    for (let i = 0; i < body.length && !res.destroyed; i += step) {
+      res.write(body.subarray(i, i + step));
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    res.end();
   } catch {
     res.writeHead(404).end("not found");
   }
