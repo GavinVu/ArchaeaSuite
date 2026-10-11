@@ -8,6 +8,7 @@ paid features. Everything works offline.
 | --- | --- | --- |
 | **ArchaeaSuite Launcher** | Install, update and launch the suite | Available |
 | **ArchaeaPhoto** | Photo editing and compositing | Preview (0.1) |
+| **ArchaeaIDE** | Code editor and IDE | Preview (0.1) |
 | ArchaeaVector | Vector illustration | Planned |
 | ArchaeaCut | Video editing | Planned |
 | ArchaeaMotion | Motion graphics and effects | Planned |
@@ -24,7 +25,7 @@ Download the launcher:
 These links always point at the newest version. The installer needs no
 administrator rights, adds a Start Menu shortcut and an entry under Windows
 Settings → Apps for uninstalling, and the launcher keeps itself up to date.
-Uninstalling the launcher leaves installed apps and your projects in place. Install ArchaeaPhoto from inside the launcher. The installers are
+Uninstalling the launcher leaves installed apps and your projects in place. Install ArchaeaPhoto and ArchaeaIDE from inside the launcher. The installers are
 not yet code-signed, so Windows SmartScreen may ask for confirmation the first
 time.
 
@@ -60,11 +61,28 @@ A layered raster editor (C#, Avalonia, SkiaSharp).
 
 Known limits of this preview are listed in [apps/ArchaeaPhoto/README.md](apps/ArchaeaPhoto/README.md).
 
+## ArchaeaIDE
+
+A code editor and IDE (Tauri, Monaco, xterm.js).
+
+- **Editor:** highlighting, autocomplete, minimap, multiple cursors, tabs,
+  split editors, command palette; language servers for IntelliSense.
+- **Project:** file explorer, search and replace across files, Git (commit,
+  branches, diffs), project templates and tasks.
+- **Run:** an integrated terminal, Run/Stop for Python, JavaScript, C/C++, C#,
+  Java and more (using the tools you have installed), and debugging with
+  breakpoints, variables and call stacks for Python and Node.js.
+- Customisable shortcuts, sandboxed extensions and an optional assistant that
+  talks only to a model running on your own computer.
+
+Details and limits: [apps/ArchaeaIDE/README.md](apps/ArchaeaIDE/README.md).
+
 ## Develop
 
 ```
 launcher/            the launcher (Tauri 2, Rust, React + TypeScript)
 apps/ArchaeaPhoto/   the photo editor (.NET 9, Avalonia 11, SkiaSharp)
+apps/ArchaeaIDE/     the code editor (Tauri 2, Rust, React, Monaco, xterm.js)
 shared/              brand sources, fonts and scripts used by every app
 catalog/             the hosted app catalog, its JSON schema and icons
 docs/                publishing guide
@@ -89,6 +107,16 @@ cd apps/ArchaeaPhoto
 dotnet run --project src/ArchaeaPhoto   # run
 dotnet test                             # engine and UI tests
 ./build.ps1                             # self-contained build + launcher package
+```
+
+**ArchaeaIDE** — needs Node.js and Rust, as the launcher does.
+
+```powershell
+cd apps/ArchaeaIDE
+npm install
+npm run tauri dev                       # run
+cd src-tauri; cargo test                # backend tests
+./build.ps1                             # release build + launcher package
 ```
 
 To test installing an app through the launcher without publishing anything,

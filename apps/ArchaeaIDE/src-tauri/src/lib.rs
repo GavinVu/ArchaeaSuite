@@ -34,9 +34,9 @@ fn startup_path() -> Option<String> {
 }
 
 #[tauri::command]
-fn app_info() -> serde_json::Value {
+fn app_info(app: tauri::AppHandle) -> serde_json::Value {
     serde_json::json!({
-        "version": env!("CARGO_PKG_VERSION"),
+        "version": app.package_info().version.to_string(),
         "arch": if cfg!(target_arch = "aarch64") { "arm64" } else { "x64" },
         "dataDir": config::data_dir().to_string_lossy(),
         "home": std::env::var("USERPROFILE").unwrap_or_default(),

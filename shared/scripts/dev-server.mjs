@@ -11,6 +11,7 @@
 // Environment switches:
 //   HELLO_VERSION=1.1.0   serve that version of the test app (simulate an update)
 //   PHOTO_VERSION=0.1.1   serve that version of ArchaeaPhoto
+//   IDE_VERSION=0.1.1     serve that version of ArchaeaIDE
 //   FAIL=checksum         advertise a wrong SHA-256 (simulate a corrupt download)
 //   THROTTLE_KBPS=2000    slow package downloads down to watch progress / cancel
 
@@ -27,6 +28,7 @@ const types = { ".json": "application/json", ".png": "image/png", ".zip": "appli
 const versionOverride = {
   "archaea-hello": process.env.HELLO_VERSION,
   "archaea-photo": process.env.PHOTO_VERSION,
+  "archaea-ide": process.env.IDE_VERSION,
 };
 
 async function devCatalog() {

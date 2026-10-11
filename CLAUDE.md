@@ -6,12 +6,16 @@ services; everything is hosted on GitHub (`GavinVu/ArchaeaSuite`).
 ```
 launcher/            ArchaeaSuite Launcher — Tauri 2, Rust, React 18 + TypeScript + Vite
 apps/ArchaeaPhoto/   ArchaeaPhoto — C# (.NET 9), Avalonia 11, SkiaSharp 2.88
+apps/ArchaeaIDE/     ArchaeaIDE — Tauri 2, Rust, React 18 + TypeScript, Monaco, xterm.js
 shared/              brand/ (logo PNGs), fonts/ (Archivo, IBM Plex Mono), scripts/
 catalog/             catalog.json + schema + icons. STAYS AT THE REPO ROOT: installed
                      launchers fetch raw.githubusercontent.com/.../main/catalog/catalog.json
 docs/PUBLISHING.md   packaging, catalog fields, release steps
 packages/            built app ZIPs (git-ignored)
 ```
+
+ArchaeaIDE's logo source is `shared/brand/ArchaeaIDELogo.png` (opaque, on
+black; the brand script keys the black out).
 
 Planned, not started: ArchaeaVector, Cut, Motion, Layout, Audio. Do not build
 them unless asked. `launcher/test-app` (Archaea Hello) is a stand-in for testing
@@ -26,7 +30,7 @@ npm run tauri dev
 npm run typecheck
 cd src-tauri; cargo test
 npm run tauri build -- --config src-tauri/tauri.unsigned.conf.json   # local installer
-npm run brand                     # regenerate brand assets for launcher AND ArchaeaPhoto
+npm run brand                     # regenerate brand assets for launcher, ArchaeaPhoto AND ArchaeaIDE
 
 # ArchaeaPhoto (dotnet is in C:\Program Files\dotnet)
 cd apps/ArchaeaPhoto
@@ -35,8 +39,16 @@ dotnet test                       # 31 engine tests + 7 headless UI tests
 ./build.ps1 [-Arch arm64] [-Version x.y.z]   # publish + package → /packages
 node tools/make-icons.mjs         # regenerate Icons.g.cs from lucide
 
+# ArchaeaIDE
+cd apps/ArchaeaIDE
+npm run tauri dev
+npm run typecheck
+cd src-tauri; cargo test          # 8 backend tests
+./build.ps1 [-Arch arm64] [-Version x.y.z]   # release exe + package → /packages
+npm run tauri icon src-tauri/app-icon.png    # after `npm run brand` changed the logo
+
 # local install/update test (no publishing)
-node shared/scripts/dev-server.mjs            # PHOTO_VERSION=0.1.1 serves an update
+node shared/scripts/dev-server.mjs            # PHOTO_VERSION=0.1.1 / IDE_VERSION=0.1.1 serves an update
 $env:ARCHAEA_DEV_CATALOG = "http://127.0.0.1:8765/catalog.json"; cd launcher; npm run tauri dev
 ```
 
@@ -63,7 +75,10 @@ Fonts are bundled, no network.
 
 Source of truth: `launcher/src/styles.css` (tokens at the top).
 `apps/ArchaeaPhoto/src/ArchaeaPhoto/App.axaml` mirrors those tokens as
-resources; change both together. The logo PNGs' black parts vanish on dark
+resources; change both together. ArchaeaIDE imports that stylesheet directly
+(`apps/ArchaeaIDE/src/main.tsx`), so renaming or removing a launcher class can
+break the IDE; its Monaco and xterm colours in `editor.ts` / `terminal.ts`
+repeat the token values. The logo PNGs' black parts vanish on dark
 backgrounds, so `launcher/scripts/make-brand-assets.mjs` derives light and
 inverse emblems and the icons; wordmarks are set in live type.
 
@@ -140,6 +155,53 @@ Rules that are easy to break:
 - Version lives in `Directory.Build.props` and must match the catalog entry.
 
 Known limits are listed in `apps/ArchaeaPhoto/README.md`.
+
+## ArchaeaIDE
+
+Backend `apps/ArchaeaIDE/src-tauri/src` is deliberately generic; what the IDE
+does with it lives in the frontend:
+
+| File | Role |
+| --- | --- |
+| `files.rs`, `search.rs` | File operations (delete = Recycle Bin), listing/search/replace honouring `.gitignore`. |
+| `pty.rs` | Pseudo-terminals (portable-pty/ConPTY) for the terminal, Run and tasks; output is base64 events. |
+| `rpc.rs` | Child processes speaking `Content-Length` framed JSON: language servers and debug adapters. |
+| `proc.rs` | One-shot `exec` (git, tool checks) and `which`. No shell: program + argument list. |
+| `ai.rs` | Ollama client; `loopback()` rejects every non-local address. |
+| `config.rs` | `settings.json`, `keybindings.json`, `state.json` in `%APPDATA%\ArchaeaSuite\ArchaeaIDE`. |
+
+Frontend `apps/ArchaeaIDE/src`: `store.ts` (UI state, settings, session),
+`editor.ts` (Monaco setup, documents, tabs/groups), `terminal.ts` (xterm, Run
+steps per language in `stepsFor`, tasks), `lsp.ts` (LSP client + Monaco
+providers), `debug.ts` (debugpy over DAP, Node over CDP, one `Backend`
+interface), `git.ts`, `workspace.ts` (folders, file ops, templates),
+`extensions.ts`, `commands.ts` + `actions.ts` (every command, default keys,
+menus), `overlay.ts` (pick/prompt/ask/context menu), `components/`.
+
+Rules that are easy to break:
+
+- **Explicit execution.** Only Run, Debug, a task or the terminal start user
+  code. Opening a folder or file must never execute anything from it. Servers
+  marked `builds` in `lsp.ts` never auto-start.
+- **No shell strings from data.** Run steps are `{program, args}`; only
+  user-written commands (tasks, custom runners) go through PowerShell.
+- **Extensions stay sandboxed**: a Web Worker plus the message API in
+  `extensions.ts`; never hand them `invoke` or file access.
+- **AI is loopback-only**; keep the check in Rust, not just the UI.
+- **Monaco import paths** are `monaco-editor/editor/editor.worker?worker`
+  etc. (the package's export map), not `esm/vs/...`.
+- **Effects must return nothing or a cleanup.** `useEffect(() => x?.focus())`
+  style one-liners that return a value crash the tree on unmount; use a block.
+- **CSP** (`tauri.conf.json`): workers need `worker-src 'self' blob:`, the
+  Node debugger needs `connect-src ws://127.0.0.1:*`.
+- Paths are Windows paths; tab ids and breakpoint keys are lowercased paths.
+- The package is one portable `ArchaeaIDE.exe` (`bundle.active: false`,
+  `tauri build --no-bundle`); version lives in `tauri.conf.json`, `Cargo.toml`
+  and `package.json` and must match the catalog entry.
+- Scripted UI tests: dev builds expose `window.ide`; reload the page after
+  editing a module (HMR drops the command registry).
+
+Known limits are listed in `apps/ArchaeaIDE/README.md`.
 
 ## Publishing
 

@@ -1,0 +1,19 @@
+ArchaeaIDE includes or links the following open-source software. Each is used
+under its own licence; the full texts ship with the respective projects.
+
+Monaco Editor            MIT          https://github.com/microsoft/monaco-editor
+  (includes the TypeScript language service, Apache-2.0)
+xterm.js                 MIT          https://github.com/xtermjs/xterm.js
+React, React DOM         MIT          https://github.com/facebook/react
+Lucide icons             ISC          https://github.com/lucide-icons/lucide
+Tauri and its plugins    MIT/Apache-2.0  https://github.com/tauri-apps/tauri
+portable-pty (WezTerm)   MIT          https://github.com/wezterm/wezterm
+ignore, regex            MIT/Unlicense, MIT/Apache-2.0  https://github.com/BurntSushi/ripgrep
+trash                    MIT          https://github.com/Byron/trash-rs
+ureq                     MIT/Apache-2.0  https://github.com/algesten/ureq
+serde, serde_json, base64  MIT/Apache-2.0
+Archivo                  SIL OFL 1.1  https://github.com/Omnibus-Type/Archivo
+IBM Plex Mono            SIL OFL 1.1  https://github.com/IBM/plex
+
+Language servers, debuggers, compilers and Ollama are not included; ArchaeaIDE
+starts the ones you have installed.

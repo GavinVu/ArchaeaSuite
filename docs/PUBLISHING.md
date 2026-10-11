@@ -134,7 +134,7 @@ cd launcher; npm run tauri dev
 
 The dev server rewrites package URLs, sizes and checksums to match the ZIPs in
 `./packages`. Start it with `FAIL=checksum` to see a rejected download, or
-`HELLO_VERSION=1.1.0` / `PHOTO_VERSION=0.1.1` to serve another version of an
+`HELLO_VERSION=1.1.0` / `PHOTO_VERSION=0.1.1` / `IDE_VERSION=0.1.1` to serve another version of an
 app as an update. An app with no ZIP in `./packages` is shown as "coming soon".
 Release builds ignore `ARCHAEA_DEV_CATALOG`.
 
@@ -182,6 +182,31 @@ ArchaeaPhoto keeps nothing inside its install folder — projects go where the
 user saves them and settings live in `%APPDATA%\ArchaeaSuite\ArchaeaPhoto` —
 so its catalog entry needs no `preserve` list and uninstalling never deletes
 projects.
+
+## Releasing ArchaeaIDE
+
+The same steps as ArchaeaPhoto, with these names:
+
+1. Set `version` in `apps/ArchaeaIDE/src-tauri/tauri.conf.json`,
+   `src-tauri/Cargo.toml` and `package.json`.
+2. `./apps/ArchaeaIDE/build.ps1` and `./apps/ArchaeaIDE/build.ps1 -Arch arm64`
+   (the ARM64 build needs `rustup target add aarch64-pc-windows-msvc` and the
+   MSVC ARM64 build tools).
+3. `node shared/scripts/catalog-set-package.mjs archaea-ide 0.1.0`, then edit
+   `releaseNotes`.
+4. Test with the local server (`IDE_VERSION=0.1.1` serves an update).
+5. Upload the same ZIPs, then publish the catalog:
+
+   ```powershell
+   gh release create archaea-ide-v0.1.0 packages/archaea-ide-0.1.0-x64.zip packages/archaea-ide-0.1.0-arm64.zip `
+       --title "ArchaeaIDE 0.1.0" --notes "Install it from ArchaeaSuite Launcher." --latest=false
+   git add catalog; git commit -m "Release ArchaeaIDE 0.1.0"; git push
+   ```
+
+The package is a single portable `ArchaeaIDE.exe` (no installer). It needs the
+WebView2 Runtime, which the launcher's installer already ensures. Settings and
+extensions live in `%APPDATA%\ArchaeaSuite\ArchaeaIDE`, so the catalog entry
+needs no `preserve` list and uninstalling never touches projects.
 
 ## Releasing the launcher itself
 

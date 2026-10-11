@@ -38,6 +38,37 @@ jobs:
           path: publish
           if-no-files-found: error
 
+  ide:
+    name: ArchaeaIDE (test and build, x64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/ArchaeaIDE
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/ArchaeaIDE/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/ArchaeaIDE/src-tauri
+      - run: npm ci
+      - name: Typecheck and build frontend
+        run: npm run build
+      - name: Backend tests
+        working-directory: apps/ArchaeaIDE/src-tauri
+        run: cargo test --locked
+      - name: Build executable
+        run: npm run tauri build -- --no-bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ArchaeaIDE-x64
+          path: apps/ArchaeaIDE/src-tauri/target/release/ArchaeaIDE.exe
+          if-no-files-found: error
+
   test:
     name: Launcher (test and build, x64)
     runs-on: windows-latest

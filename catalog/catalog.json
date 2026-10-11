@@ -33,6 +33,19 @@
       }
     },
     {
+      "id": "archaea-ide",
+      "name": "ArchaeaIDE",
+      "tagline": "A code editor and IDE with a terminal, Run button, debugger and Git.",
+      "description": "A fast code editor for writing, running and debugging programs.\n\nEdit with syntax highlighting, autocomplete, a minimap, multiple cursors, split editors and a command palette. Browse a project folder, search and replace across files, and work in an integrated terminal. Press Run to start Python, JavaScript, TypeScript, C, C++, C#, Java, Go, Rust and more with the tools you have installed. Set breakpoints and inspect variables in Python and Node.js programs. Commit, branch and compare changes with Git.\n\nAlso included: project templates, tasks, customisable shortcuts, sandboxed extensions and an optional assistant that uses a model running on your own computer. Works fully offline.",
+      "icon": "icons/archaea-ide.png",
+      "category": "Development",
+      "status": "available",
+      "featured": true,
+      "releaseNotes": "First preview release.\n- Editor with IntelliSense for JavaScript, TypeScript, JSON, CSS and HTML, and language servers for other languages\n- File explorer, search and replace, integrated terminal\n- Run and Stop for many languages; debugging for Python and Node.js\n- Git: commit, branches, diffs\n- Project templates, tasks, extensions, shortcuts and optional local AI",
+      "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/apps/ArchaeaIDE",
+      "executable": "ArchaeaIDE.exe"
+    },
+    {
       "id": "archaea-vector",
       "name": "ArchaeaVector",
       "tagline": "Vector illustration and logo design.",
