@@ -301,6 +301,8 @@ function attachNode(url: string) {
     });
   const ids = new Map<string, string[]>();
   const frames = new Map<string, Json>();
+  /** Script id -> URL; call frames do not always carry the URL themselves. */
+  const scripts = new Map<string, string>();
   const setBreakpoints = async (path: string, lines: number[]) => {
     const k = path.toLowerCase();
     for (const id of ids.get(k) ?? []) await send("Debugger.removeBreakpoint", { breakpointId: id }).catch(() => {});
@@ -358,6 +360,8 @@ function attachNode(url: string) {
       pending.delete(m.id);
       if (m.error) waiting?.reject(new Error(m.error.message));
       else waiting?.resolve(m.result);
+    } else if (m.method === "Debugger.scriptParsed") {
+      scripts.set(m.params.scriptId, m.params.url);
     } else if (m.method === "Debugger.paused") {
       // --inspect-brk stops before the first line; breakpoints are set by now, so go on.
       if (first) {
@@ -367,7 +371,7 @@ function attachNode(url: string) {
       frames.clear();
       const list: Frame[] = m.params.callFrames.map((f: Json) => {
         frames.set(f.callFrameId, f);
-        return { id: f.callFrameId, name: f.functionName || "(anonymous)", path: fileUrlToPath(f.url), line: f.location.lineNumber + 1 };
+        return { id: f.callFrameId, name: f.functionName || "(anonymous)", path: fileUrlToPath(f.url || scripts.get(f.location.scriptId) || ""), line: f.location.lineNumber + 1 };
       });
       void stopped(list, m.params.reason === "other" ? "breakpoint" : m.params.reason);
     } else if (m.method === "Debugger.resumed") {
