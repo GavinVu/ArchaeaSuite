@@ -4,6 +4,7 @@
 //   src-tauri/app-icon.png         1024px source for `npm run tauri icon`
 //   ../apps/ArchaeaPhoto/.../Assets  ArchaeaPhoto emblem and icon (from ArchaeaPhotoLogo.png)
 //   ../catalog/icons/*.png           icons for the sample catalog
+//   ../apps/ArchaeaIDE/...           ArchaeaIDE emblem, icon source and catalog icon (from ArchaeaIDELogo.png)
 //
 // Run with `npm run brand`, then `npm run tauri icon src-tauri/app-icon.png`.
 
@@ -239,6 +240,75 @@ for (const [id, glyph] of Object.entries(glyphs)) {
   };
   await writeFile(await out("src-tauri/installer/sidebar.bmp"), await art(164, 314, 116, 70, 12));
   await writeFile(await out("src-tauri/installer/header.bmp"), await art(150, 57, 44, 4, 4));
+}
+
+// --- 6. ArchaeaIDE: emblem, application icon and catalog icon ---------------
+// ArchaeaIDELogo.png is opaque: a charcoal emblem on black with a lime core
+// and off-white brackets. Each pixel is split into charcoal, lime and white
+// coverage (black becomes transparent) and then recoloured like the others.
+{
+  const ideDir = "../apps/ArchaeaIDE";
+  const { data: px, info: pi } = await sharp(resolve(root, "../shared/brand/ArchaeaIDELogo.png"))
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const W = pi.width, H = pi.height;
+  const clamp = (v) => Math.max(0, Math.min(1, v));
+  const parts = new Float32Array(W * H * 3); // charcoal, lime, white
+  const alpha = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    const g = px[i * 3 + 1], b = px[i * 3 + 2];
+    const lime = clamp((g - b) / 235);
+    const white = clamp((b - 40) / 190) * (1 - lime);
+    const dark = clamp(clamp((b - 3) / 17) - white - lime);
+    parts.set([dark, lime, white], i * 3);
+    alpha[i] = Math.round(255 * clamp(dark + lime + white));
+  }
+  const ink = (y) => {
+    for (let x = 0; x < W; x++) if (alpha[y * W + x] > 60) return true;
+    return false;
+  };
+  let t = 0;
+  while (t < H && !ink(t)) t++;
+  let bt = t;
+  for (let y = t, gap = 0; y < H; y++) {
+    if (ink(y)) { bt = y; gap = 0; } else if (++gap > 12) break;
+  }
+  let l = W, r = 0;
+  for (let y = t; y <= bt; y++)
+    for (let x = 0; x < W; x++)
+      if (alpha[y * W + x] > 60) { if (x < l) l = x; if (x > r) r = x; }
+  const ibox = { left: l, top: t, width: r - l + 1, height: bt - t + 1 };
+  console.log("ide emblem bounds:", ibox);
+  const iside = Math.max(ibox.width, ibox.height);
+
+  const tint = (dark, light) => {
+    const rgba = Buffer.alloc(W * H * 4);
+    for (let i = 0; i < W * H; i++) {
+      const [k, lime, w] = parts.subarray(i * 3, i * 3 + 3);
+      const sum = k + lime + w || 1;
+      for (let c = 0; c < 3; c++) rgba[i * 4 + c] = Math.round((dark[c] * k + LIME[c] * lime + light[c] * w) / sum);
+      rgba[i * 4 + 3] = alpha[i];
+    }
+    return sharp(rgba, { raw: { width: W, height: H, channels: 4 } })
+      .extract(ibox)
+      .extend({
+        top: Math.floor((iside - ibox.height) / 2), bottom: Math.ceil((iside - ibox.height) / 2),
+        left: Math.floor((iside - ibox.width) / 2), right: Math.ceil((iside - ibox.width) / 2),
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+  };
+  const ideInk = await tint(INK, PAPER);
+  await sharp(ideInk).resize(512, 512).png().toFile(await out(`${ideDir}/public/brand/mark.png`));
+  await sharp(await tint(PAPER, INK)).resize(512, 512).png().toFile(await out(`${ideDir}/public/brand/mark-inverse.png`));
+  const ideIcon = await sharp(tile)
+    .composite([{ input: await sharp(ideInk).resize(760, 760).png().toBuffer(), gravity: "centre" }])
+    .png()
+    .toBuffer();
+  await sharp(ideIcon).toFile(await out(`${ideDir}/src-tauri/app-icon.png`));
+  await sharp(ideIcon).resize(256, 256).png({ compressionLevel: 9 }).toFile(await out("../catalog/icons/archaea-ide.png"));
 }
 
 console.log("brand assets written");
