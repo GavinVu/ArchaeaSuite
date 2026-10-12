@@ -19,7 +19,8 @@ import { EditorArea } from "./components/EditorArea";
 import { Explorer } from "./components/Explorer";
 import { Overlays } from "./components/Overlays";
 import { Panel, useMarkers } from "./components/Panel";
-import { AiView, DebugView, ExtensionsView, GitView, SearchView } from "./components/SideViews";
+import { AiView } from "./components/AiView";
+import { DebugView, ExtensionsView, GitView, SearchView } from "./components/SideViews";
 
 let booted = false;
 async function boot() {

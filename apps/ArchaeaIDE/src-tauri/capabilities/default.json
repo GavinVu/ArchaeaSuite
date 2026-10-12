@@ -15,6 +15,7 @@
     "dialog:allow-open",
     "dialog:allow-save",
     "opener:allow-open-url",
+    { "identifier": "opener:allow-open-path", "allow": [{ "path": "**" }] },
     "opener:allow-reveal-item-in-dir"
   ]
 }

@@ -108,9 +108,34 @@ pub fn ai_cancel(state: tauri::State<State>, id: String) {
     }
 }
 
+/// Starts the Ollama server (`ollama serve`) in the background. It is left
+/// running when the IDE closes, like the copy Ollama's own tray app starts.
+/// Only a program actually named ollama is accepted.
+#[tauri::command]
+pub fn ai_start(program: String) -> Res<()> {
+    let path = crate::proc::resolve(&program).ok_or("Ollama was not found.")?;
+    let stem = path.file_stem().map(|s| s.to_string_lossy().to_lowercase()).unwrap_or_default();
+    if stem != "ollama" {
+        return Err("Only Ollama can be started from here.".into());
+    }
+    let mut cmd = crate::proc::command(&path.to_string_lossy(), &["serve".to_string()], None)?;
+    cmd.stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map(drop)
+        .map_err(err)
+}
+
 #[cfg(test)]
 mod tests {
     use super::loopback;
+
+    #[test]
+    fn only_ollama_can_be_started() {
+        assert!(super::ai_start("cmd".into()).is_err());
+        assert!(super::ai_start("surely-not-installed-ollama-xyz".into()).is_err());
+    }
 
     #[test]
     fn only_loopback_hosts_are_accepted() {

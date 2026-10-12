@@ -1,7 +1,7 @@
 {
   "name": "archaea-ide",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ArchaeaIDE — a code editor and IDE. Part of ArchaeaSuite.",
   "license": "GPL-3.0-or-later",
   "type": "module",

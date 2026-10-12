@@ -77,6 +77,7 @@ pub fn run() {
             ai::ai_models,
             ai::ai_chat,
             ai::ai_cancel,
+            ai::ai_start,
         ])
         .build(tauri::generate_context!())
         .expect("failed to start ArchaeaIDE")

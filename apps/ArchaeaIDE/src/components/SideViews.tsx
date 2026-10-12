@@ -1,17 +1,17 @@
-// Search, Source Control, Run and Debug, Extensions and the local AI assistant.
+// Search, Source Control, Run and Debug and Extensions.
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowDownToLine, ArrowUpFromLine, Bug, CaseSensitive, Check, ChevronDown, ChevronRight, GitBranch, Minus, Pause, Play,
-  Plus, RefreshCw, Regex, Replace, Send, Square, StepForward, ArrowDownToDot, ArrowUpFromDot, Undo2, WholeWord, Trash2,
+  Plus, RefreshCw, Regex, Replace, Square, StepForward, ArrowDownToDot, ArrowUpFromDot, Undo2, WholeWord, Trash2,
 } from "lucide-react";
-import { api, basename, errorText, on, type FileMatches, type Query } from "../api";
+import { api, basename, errorText, type FileMatches, type Query } from "../api";
 import { run } from "../commands";
 import { debug, selectFrame, startDebugging, toggleBreakpoint, useDebug, type Variable } from "../debug";
-import { activeEditor, openDiff, openFile, saveAll, syncWithDisk } from "../editor";
+import { openDiff, openFile, saveAll, syncWithDisk } from "../editor";
 import { setExtensionEnabled, useExtensions } from "../extensions";
 import { git, headText, recentCommits, refreshGit, useGit, type Change, type Commit } from "../git";
 import { ask } from "../overlay";
-import { fail, saveSettings, toast, touchFs, useStore } from "../store";
+import { fail, toast, touchFs, useStore } from "../store";
 import { switchBranch } from "../actions";
 import { shortPath } from "./Explorer";
 
@@ -370,144 +370,6 @@ export function ExtensionsView() {
           <button className="btn btn-wide" onClick={() => run("ext.folder")}>Open extensions folder</button>
         </div>
       </div>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------- local AI
-
-interface Message { role: "user" | "assistant" | "system"; content: string }
-let chatSeq = 0;
-const chatHandlers = new Map<string, (chunk: { text: string; done: boolean; error: string | null }) => void>();
-on<{ id: string; text: string; done: boolean; error: string | null }>("ai:chunk", (c) => chatHandlers.get(c.id)?.(c));
-let history: Message[] = [];
-
-export function AiView() {
-  const settings = useStore((s) => s.settings);
-  const [models, setModels] = useState<string[]>([]);
-  const [problem, setProblem] = useState("");
-  const [messages, setMessages] = useState<Message[]>(history);
-  const [text, setText] = useState("");
-  const [streaming, setStreaming] = useState<string | null>(null);
-  const [withCode, setWithCode] = useState(true);
-  const end = useRef<HTMLDivElement>(null);
-  useEffect(() => void (history = messages), [messages]);
-  useEffect(() => {
-    end.current?.scrollIntoView({ block: "end" });
-  }, [messages]);
-
-  const connect = () => {
-    setProblem("");
-    api.aiModels(settings.aiUrl).then((list) => {
-      setModels(list);
-      if (list.length === 0) setProblem("The server is running but has no models. Download one with: ollama pull qwen2.5-coder");
-      else if (!list.includes(settings.aiModel)) saveSettings({ aiModel: list[0] });
-    }).catch((e) => (setModels([]), setProblem(errorText(e))));
-  };
-  useEffect(() => {
-    if (settings.aiEnabled) connect();
-  }, [settings.aiEnabled, settings.aiUrl]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!settings.aiEnabled)
-    return (
-      <>
-        <div className="side-head"><span>Local AI</span></div>
-        <div className="side-empty">
-          <p>Ask questions about your code using a model that runs on this computer with <b>Ollama</b>. It is optional, free and off by default. Your code never leaves this PC.</p>
-          <button className="btn btn-primary btn-wide" onClick={() => saveSettings({ aiEnabled: true })}>Turn on local AI</button>
-        </div>
-      </>
-    );
-
-  const send = async () => {
-    const question = text.trim();
-    if (!question || streaming) return;
-    const editor = activeEditor();
-    const model = editor?.getModel();
-    const selection = editor?.getSelection();
-    let context = "";
-    if (withCode && model) {
-      const selected = selection && !selection.isEmpty() ? model.getValueInRange(selection) : "";
-      const code = (selected || model.getValue()).slice(0, 24_000);
-      context = `\n\n${selected ? "Selected code" : "Current file"} (${basename(model.uri.fsPath)}):\n\`\`\`${model.getLanguageId()}\n${code}\n\`\`\``;
-    }
-    const next: Message[] = [...messages, { role: "user", content: question }, { role: "assistant", content: "" }];
-    setMessages(next);
-    setText("");
-    const id = `chat-${++chatSeq}`;
-    setStreaming(id);
-    chatHandlers.set(id, (chunk) => {
-      if (chunk.text) setMessages((m) => [...m.slice(0, -1), { role: "assistant", content: m[m.length - 1].content + chunk.text }]);
-      if (chunk.error) setMessages((m) => [...m.slice(0, -1), { role: "assistant", content: `${m[m.length - 1].content}\n[${chunk.error}]`.trim() }]);
-      if (chunk.done) {
-        chatHandlers.delete(id);
-        setStreaming(null);
-      }
-    });
-    const sent: Message[] = [
-      { role: "system", content: "You are a concise programming assistant inside a code editor. Answer with short explanations and code blocks." },
-      ...messages,
-      { role: "user", content: question + context },
-    ];
-    await api.aiChat(id, settings.aiUrl, settings.aiModel, sent).catch((e) => {
-      chatHandlers.get(id)?.({ text: "", done: true, error: errorText(e) });
-    });
-  };
-  const insert = (content: string) => {
-    const code = /```[^\n]*\n([\s\S]*?)```/.exec(content)?.[1] ?? content;
-    const editor = activeEditor();
-    const selection = editor?.getSelection();
-    if (!editor || !selection) return toast("info", "Open a file to insert into.");
-    editor.executeEdits("ai", [{ range: selection, text: code, forceMoveMarkers: true }]);
-    editor.focus();
-  };
-
-  return (
-    <>
-      <div className="side-head">
-        <span>Local AI</span>
-        <button className="btn-icon" title="Reconnect" onClick={connect}><RefreshCw size={14} strokeWidth={2.25} /></button>
-        <button className="btn-icon" title="Clear conversation" onClick={() => setMessages([])}><Trash2 size={14} strokeWidth={2.25} /></button>
-      </div>
-      {problem ? (
-        <div className="side-empty">
-          <p>{problem}</p>
-          <p>Install Ollama from ollama.com, run <b>ollama pull qwen2.5-coder</b>, then reconnect.</p>
-          <button className="btn btn-wide" onClick={connect}>Reconnect</button>
-          <button className="btn btn-wide" onClick={() => saveSettings({ aiEnabled: false })}>Turn off local AI</button>
-        </div>
-      ) : (
-        <>
-          <div className="side-form">
-            <select className="field" aria-label="Model" value={settings.aiModel} onChange={(e) => saveSettings({ aiModel: e.target.value })}>
-              {models.map((m) => <option key={m}>{m}</option>)}
-            </select>
-          </div>
-          <div className="side-scroll chat">
-            {messages.length === 0 && <p className="side-note pad">Ask about the open file, or select code first to ask about just that.</p>}
-            {messages.map((m, i) => (
-              <div key={i} className={`chat-msg is-${m.role}`}>
-                <div className="chat-text selectable">{m.content || (streaming ? "…" : "")}</div>
-                {m.role === "assistant" && m.content && !(streaming && i === messages.length - 1) && (
-                  <button className="btn btn-sm" onClick={() => insert(m.content)}>Insert code at cursor</button>
-                )}
-              </div>
-            ))}
-            <div ref={end} />
-          </div>
-          <div className="side-form">
-            <label className="check"><input type="checkbox" checked={withCode} onChange={(e) => setWithCode(e.target.checked)} /> Include selection or current file</label>
-            <div className="field-row">
-              <textarea className="field" rows={2} placeholder="Ask about your code" value={text} aria-label="Message"
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), void send())} />
-              {streaming
-                ? <button className="btn-icon is-stop" title="Stop" onClick={() => void api.aiCancel(streaming)}><Square size={13} strokeWidth={3} /></button>
-                : <button className="btn-icon" title="Send" onClick={() => void send()}><Send size={15} strokeWidth={2.25} /></button>}
-            </div>
-          </div>
-        </>
-      )}
     </>
   );
 }

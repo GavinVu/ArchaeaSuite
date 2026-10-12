@@ -50,6 +50,7 @@ export const api = {
   aiModels: (baseUrl: string) => invoke<string[]>("ai_models", { baseUrl }),
   aiChat: (id: string, baseUrl: string, model: string, messages: { role: string; content: string }[]) =>
     invoke<void>("ai_chat", { id, baseUrl, model, messages }),
+  aiStart: (program: string) => invoke<void>("ai_start", { program }),
   aiCancel: (id: string) => invoke<void>("ai_cancel", { id }),
 };
 

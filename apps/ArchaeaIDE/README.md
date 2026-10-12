@@ -28,7 +28,10 @@ stylesheet, so the two always match.
   against HEAD, recent commits.
 - **More:** command palette, project templates, tasks (`.archaea/tasks.json`
   plus detected npm/cargo/dotnet/go/make tasks), customisable shortcuts,
-  sandboxed extensions, optional local AI through Ollama.
+  sandboxed extensions.
+- **Local AI (optional):** chat about the open file or selection with a model
+  running on your own PC through [Ollama](https://ollama.com). The panel walks
+  through setup: install Ollama (winget), start it, download a model.
 
 ## Safety
 
@@ -51,7 +54,8 @@ this computer.
 - Git covers the everyday commands; merges, rebases and stashes go through
   the terminal.
 - Language servers, compilers, debugpy and Ollama are not bundled.
-- The local AI client is tested against the Ollama HTTP API only.
+- Local AI speaks the Ollama HTTP API only, and answers are as good as the
+  model you download; the small default is fast rather than clever.
 
 ## Develop
 

@@ -67,6 +67,21 @@ pub fn pty_spawn(
         None => CommandBuilder::new(std::env::var("SHELL").unwrap_or_else(|_| "sh".into())),
     };
     cmd.args(args.unwrap_or_default());
+    // portable-pty builds the environment from the registry, which picks up
+    // tools installed while the IDE is open. Keep the IDE's own PATH in front
+    // of it, so a program started here sees what `which` saw (its DLLs too).
+    if let Some(own) = std::env::var_os("PATH") {
+        let fresh = cmd.get_env("PATH").map(|v| v.to_os_string()).unwrap_or_default();
+        let mut dirs: Vec<std::path::PathBuf> = std::env::split_paths(&own).collect();
+        for dir in std::env::split_paths(&fresh) {
+            if !dirs.contains(&dir) {
+                dirs.push(dir);
+            }
+        }
+        if let Ok(path) = std::env::join_paths(dirs) {
+            cmd.env("PATH", path);
+        }
+    }
     if let Some(dir) = cwd.filter(|d| std::path::Path::new(d).is_dir()) {
         cmd.cwd(dir);
     }

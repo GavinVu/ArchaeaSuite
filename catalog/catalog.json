@@ -1,7 +1,7 @@
 {
   "$schema": "./catalog.schema.json",
   "schemaVersion": 1,
-  "updated": "2026-10-11",
+  "updated": "2026-10-12",
   "apps": [
     {
       "id": "archaea-photo",
@@ -41,23 +41,23 @@
       "category": "Development",
       "status": "available",
       "featured": true,
-      "releaseNotes": "First preview release.\n- Editor with IntelliSense for JavaScript, TypeScript, JSON, CSS and HTML, and language servers for other languages\n- File explorer, search and replace, integrated terminal\n- Run and Stop for many languages; debugging for Python and Node.js\n- Git: commit, branches, diffs\n- Project templates, tasks, extensions, shortcuts and optional local AI",
+      "releaseNotes": "Local AI now sets itself up, plus fixes.\n- Local AI: the panel installs Ollama, starts it and downloads a model for you, step by step\n- AI replies show code blocks, each with an Insert at cursor button\n- Programs you run now see the same PATH as the IDE, so compiled C++ programs find their runtime\n- Running an HTML file opens it in your browser\n- New setting: Python interpreter (for virtual environments)",
       "homepage": "https://github.com/GavinVu/ArchaeaSuite/tree/main/apps/ArchaeaIDE",
       "executable": "ArchaeaIDE.exe",
-      "version": "0.1.0",
-      "releaseDate": "2026-10-11",
+      "version": "0.1.1",
+      "releaseDate": "2026-10-12",
       "packages": {
         "x64": {
-          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-ide-v0.1.0/archaea-ide-0.1.0-x64.zip",
-          "sha256": "2cce25f2498199a4a6d1d7350db67ecf9805be17118331dd348e1b99bffe6657",
-          "size": 5833487,
-          "installedSize": 8614382
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-ide-v0.1.1/archaea-ide-0.1.1-x64.zip",
+          "sha256": "b8d8c667db912953ee35e694da506bee47936f1e7436fe55a9e0c8d9316202ef",
+          "size": 5839413,
+          "installedSize": 8631285
         },
         "arm64": {
-          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-ide-v0.1.0/archaea-ide-0.1.0-arm64.zip",
-          "sha256": "a7574a0236d80aa0a0ae7fe303739ec38c07be09cf8448ef7647be328067b320",
-          "size": 5735487,
-          "installedSize": 8288752
+          "url": "https://github.com/GavinVu/ArchaeaSuite/releases/download/archaea-ide-v0.1.1/archaea-ide-0.1.1-arm64.zip",
+          "sha256": "5c556595be2251e190cdd6165644e2175ca0b95f2235b7ed6ed12f6c7ba6851c",
+          "size": 5742307,
+          "installedSize": 8298487
         }
       }
     },

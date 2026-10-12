@@ -187,7 +187,11 @@ Rules that are easy to break:
   user-written commands (tasks, custom runners) go through PowerShell.
 - **Extensions stay sandboxed**: a Web Worker plus the message API in
   `extensions.ts`; never hand them `invoke` or file access.
-- **AI is loopback-only**; keep the check in Rust, not just the UI.
+- **AI is loopback-only**; keep the check in Rust, not just the UI. `ai_start`
+  may only launch a program named `ollama`.
+- **Terminal PATH.** portable-pty builds a child's environment from the
+  registry, not from the IDE process; `pty.rs` puts the IDE's PATH in front so
+  Run sees the same tools `which` found. Do not drop that merge.
 - **Monaco import paths** are `monaco-editor/editor/editor.worker?worker`
   etc. (the package's export map), not `esm/vs/...`.
 - **Effects must return nothing or a cleanup.** `useEffect(() => x?.focus())`
